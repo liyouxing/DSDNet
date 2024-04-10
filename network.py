@@ -35,22 +35,6 @@ def decomposition(x, radius_list=None, eps_list=None):
     return LF, HF
 
 
-def AtmLight(tensor):
-    """
-    select highest top 0.1％ pixel and average these value to Atm
-    """
-    m, c, h, w = tensor.shape[::]
-
-    vec_len = h * w
-    numpx = int(max(math.floor(vec_len / 1000), 1))  # top 0.1 pixel number
-    tensor_vec = tensor.reshape(m, -1)  # reshape to (m, c*h*w)
-    tensor_vec = tensor_vec.sort(dim=-1, descending=True).values
-    atm = torch.sum(tensor_vec[:, 0:numpx], dim=-1) / numpx
-    atm = atm.unsqueeze(dim=-1).repeat(1, 3).unsqueeze(dim=-1).unsqueeze(dim=-1).repeat(1, 1, h, w)
-
-    return atm
-
-
 'network modules'
 
 
@@ -333,7 +317,6 @@ class DSDNet(nn.Module):
     def __init__(self, ):
         super().__init__()
 
-        self.epsilon = 0.00001
         self.radius_list = [30]
         self.eps_list = [1]
 
@@ -347,9 +330,9 @@ class DSDNet(nn.Module):
         trans_lf = self.TLNet(x_lf)  # TL
         atm_lf = self.ALNet(x_lf)  # AL
 
-        bg_lf = (x_lf - (1 - trans_lf) * atm_lf) / (trans_lf + self.epsilon)  # LB
+        bg_lf = (x_lf - (1 - trans_lf) * atm_lf) / (trans_lf + 0.00001)  # LB
 
-        # inp_hf = x_hf
+        inp_hf = x_hf
 
         bg_hf = self.HNet(x_hf)  # HB
 
@@ -357,7 +340,7 @@ class DSDNet(nn.Module):
 
         bg = torch.clamp(bg, 0., 1.)
 
-        return bg  # , bg_lf, bg_hf, atm_lf, trans_lf, inp_hf
+        return bg, bg_lf, bg_hf, atm_lf, trans_lf, inp_hf
 
 
 if __name__ == '__main__':
