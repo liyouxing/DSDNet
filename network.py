@@ -349,7 +349,6 @@ if __name__ == '__main__':
     mode = 2
     net = DSDNet()
     if mode == 1:
-        # real times on RTX3090
         os.environ['CUDA_VISIBLE_DEVICES'] = "0"
         net = net.cuda()
         net.eval()
