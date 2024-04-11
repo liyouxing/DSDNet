@@ -1,0 +1,9 @@
+torch==1.5.0
+torchvision==0.5.0
+numpy
+matplotlib
+PIL
+scikit-image
+scipy
+Pillow
+guided_filter_pytorch
