@@ -75,7 +75,6 @@ def add_common_args(parser, dataset_name=None):
     parser.add_argument('--save_epoch_interval', type=int, default=save_epoch_interval,
                         help='the frequency of saving model')
 
-    return parser
 
 
 def get_args_T(dataset_name):
