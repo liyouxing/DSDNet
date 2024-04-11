@@ -129,19 +129,17 @@ def print_network(net, log_dir):
     print('Total number of parameters: %d' % num_params)
 
 
-def print_log(log_dir, epoch, total_epochs, epoch_interval, train_psnr, val_psnr, val_ssim, loss, lr):
-    print('Date: {0}s, Time_Cost: {1:.0f}s, Epoch: [{2}/{3}], Train_PSNR: {4:.2f}, Val_PSNR:{5:.2f}, '
-          'Val_SSIM:{6:.4f}, loss:{7:.4f}, lr:{8:.6f}'.format(
+def print_log(log_dir, epoch, total_epochs, epoch_interval, val_psnr, val_ssim, loss, lr):
+    print('Date: {0}s, Time_Cost: {1:.0f}s, Epoch: [{2}/{3}], Val_PSNR:{4:.2f}, '
+          'Val_SSIM:{5:.4f}, loss:{6:.4f}, lr:{7:.6f}'.format(
         time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-        epoch_interval, epoch, total_epochs, train_psnr,
-        val_psnr, val_ssim, loss, lr))
+        epoch_interval, epoch, total_epochs, val_psnr, val_ssim, loss, lr))
     #  Recording
     with open('./{}/training_log.txt'.format(log_dir), 'a') as f:
-        print('Date: {0}s, Time_Cost: {1:.0f}s, Epoch: [{2}/{3}], Train_PSNR: {4:.2f}, Val_PSNR:{5:.2f}, '
-              'Val_SSIM:{6:.4f}, loss:{7:.4f}, lr:{8:.6f}'.format(
+        print('Date: {0}s, Time_Cost: {1:.0f}s, Epoch: [{2}/{3}], Val_PSNR:{4:.2f}, '
+              'Val_SSIM:{5:.4f}, loss:{6:.4f}, lr:{7:.6f}'.format(
             time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()),
-            epoch_interval, epoch, total_epochs, train_psnr,
-            val_psnr, val_ssim, loss, lr), file=f)
+            epoch_interval, epoch, total_epochs, val_psnr, val_ssim, loss, lr), file=f)
 
 
 def AtmLight(tensor):
@@ -243,6 +241,32 @@ def valid_TAH(net, loader, device):
     avr_psnr = all_batch_avg_scores(psnr_list)
     avr_ssim = all_batch_avg_scores(ssim_list)
     return avr_psnr, avr_ssim
+
+
+def init_weights(net, init_type='normal', init_gain=0.02):
+    """Initialization methods provided by CycleGAN."""
+
+    def init_func(m):  # define the initialization function
+        classname = m.__class__.__name__
+        if hasattr(m, 'weight') and (classname.find('Conv') != -1 or classname.find('Linear') != -1):
+            if init_type == 'normal':
+                torch.nn.init.normal_(m.weight.data, 0.0, init_gain)
+            elif init_type == 'xavier':
+                torch.nn.init.xavier_normal_(m.weight.data, gain=init_gain)
+            elif init_type == 'kaiming':
+                torch.nn.init.kaiming_normal_(m.weight.data, a=0, mode='fan_in', nonlinearity='relu')
+            elif init_type == 'orthogonal':
+                torch.nn.init.orthogonal_(m.weight.data, gain=init_gain)
+            else:
+                raise NotImplementedError('initialization method [%s] is not implemented' % init_type)
+            if hasattr(m, 'bias') and m.bias is not None:
+                torch.nn.init.constant_(m.bias.data, 0.0)
+        elif classname.find('BatchNorm2d') != -1:
+            torch.nn.init.normal_(m.weight.data, 1.0, init_gain)
+            torch.nn.init.constant_(m.bias.data, 0.0)
+
+    print('initialize network with %s' % init_type)
+    net.apply(init_func)
 
 
 if __name__ == "__main__":
