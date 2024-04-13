@@ -33,10 +33,12 @@ satisfactory results both qualitatively and quantitatively.*
 - tensorboardX ~= 2.2
 
 ### Dataset structure
+
 1. download the datasets and arrange the images in the following order
 2. Save the image names into text file
 
 ****
+
 ```
 data
 └── <dataset_name>
@@ -56,4 +58,12 @@ data
         ├── val_norain.txt
         └── val_rain.txt
 
+```
+
+### Train and Test DSDNet
+
+****
+
+```
+python main_train_test.py
 ```
