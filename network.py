@@ -7,6 +7,22 @@ from guided_filter_pytorch.guided_filter import GuidedFilter
 'function'
 
 
+def AtmLight(tensor):
+    """
+    select highest top 0.1％ pixel and average these value to Atm
+    """
+    m, c, h, w = tensor.shape[::]
+
+    vec_len = h * w
+    numpx = int(max(math.floor(vec_len / 1000), 1))  # top 0.1 pixel number
+    tensor_vec = tensor.reshape(m, -1)  # reshape to (m, c*h*w)
+    tensor_vec = tensor_vec.sort(dim=-1, descending=True).values
+    atm = torch.sum(tensor_vec[:, 0:numpx], dim=-1) / numpx
+    atm = atm.unsqueeze(dim=-1).repeat(1, 3).unsqueeze(dim=-1).unsqueeze(dim=-1).repeat(1, 1, h, w)
+
+    return atm
+
+
 def get_residual(ts):
     max_channel = torch.max(ts, dim=1, keepdim=True)
     min_channel = torch.min(ts, dim=1, keepdim=True)
@@ -314,11 +330,11 @@ class HNet(nn.Module):
 
 
 class DSDNet(nn.Module):
-    def __init__(self, ):
+    def __init__(self, radius_list, eps_list):
         super().__init__()
 
-        self.radius_list = [30]
-        self.eps_list = [1]
+        self.radius_list = radius_list
+        self.eps_list = eps_list
 
         self.TLNet = TLNet()
         self.ALNet = ALNet()
@@ -349,6 +365,7 @@ if __name__ == '__main__':
     mode = 2
     net = DSDNet()
     if mode == 1:
+        # real times on RTX3090
         os.environ['CUDA_VISIBLE_DEVICES'] = "0"
         net = net.cuda()
         net.eval()
