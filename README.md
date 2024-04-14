@@ -34,7 +34,7 @@ satisfactory results both qualitatively and quantitatively.*
 
 ### Dataset structure
 
-1. download the datasets and arrange the images in the following order
+1. download the datasets from [<u>here</u>](https://github.com/nnUyi/DerainZoo) and arrange the images in the following order
 2. Save the image names into text file
 
 ****
